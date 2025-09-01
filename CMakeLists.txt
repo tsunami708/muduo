@@ -12,7 +12,7 @@ set(LOG_FILE OFF CACHE STRING "日志输出到record.log文件")
 if(LOG_FILE)
     add_definitions(-DLOG_TO_FILE)
 endif()
-
+message(STATUS "日志到文件:${LOG_FILE}")
 
 set(LOG_LEVEL "E" CACHE STRING "日志等级")
 set(VALID_LOG_LEVELS T D I W E F)

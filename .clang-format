@@ -1,0 +1,35 @@
+BasedOnStyle: GNU
+Language: Cpp
+IndentWidth: 4
+ColumnLimit: 100
+PointerAlignment: Left
+AccessModifierOffset: -4
+
+
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true    
+  AfterClass: false      
+  AfterStruct: false     
+  AfterEnum: false       
+  AfterNamespace: true  
+  AfterUnion: false      
+  AfterControlStatement: false  
+  AfterCaseLabel: true  
+
+
+AlignAfterOpenBracket: Align  
+AllowShortBlocksOnASingleLine: true
+AllowShortFunctionsOnASingleLine: All
+
+ContinuationIndentWidth: 4
+Cpp11BracedListStyle: true
+SpaceBeforeParens: ControlStatements
+MaxEmptyLinesToKeep: 10
+IndentWrappedFunctionNames: false
+AlwaysBreakAfterReturnType: None
+AlwaysBreakAfterDefinitionReturnType: None
+BinPackParameters: false
+
+SortIncludes: false

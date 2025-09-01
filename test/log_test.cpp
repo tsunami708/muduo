@@ -1,9 +1,10 @@
+
 #include <thread>
 
 #include "log.h"
-
-int main(){
-    std::jthread t0([](){
+int main()
+{
+    std::jthread t0([]() {
         LOG_TRACE("message");
         LOG_DEBUG("message");
         LOG_INFO("message");
@@ -11,7 +12,7 @@ int main(){
         LOG_ERROR("message");
     });
 
-    std::jthread t2([](){
+    std::jthread t2([]() {
         LOG_TRACE("message");
         LOG_DEBUG("message");
         // LOG_FATAL("message_");
