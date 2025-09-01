@@ -1,6 +1,7 @@
 #include <cstring>
 #include <format>
 #include <unistd.h>
+#include <sys/epoll.h>
 #include "epoller.h"
 #include "channel.h"
 #include "log.h"
@@ -11,6 +12,7 @@ epoller_t::epoller_t(eventloop_t* onwer_loop)
     if (_epoll_fd < 0) [[unlikely]] {
         LOG_FATAL(std::format("epoller_t-ctor:{}", strerror(errno)).c_str());
     }
+    _active_events.resize(10);
 }
 
 

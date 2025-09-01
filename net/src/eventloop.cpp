@@ -1,5 +1,6 @@
 #include "eventloop.h"
 #include "channel.h"
+#include "epoller.h"
 #include "log.h"
 
 thread_local eventloop_t* this_thread_eventloop = nullptr;
@@ -10,6 +11,16 @@ eventloop_t::eventloop_t() : _onwer_tid(this_thread_id), _epoller(new epoller_t(
         LOG_FATAL("eventloop_t-ctor:multiple eventloop in a thread");
     }
     this_thread_eventloop = this;
+}
+
+
+
+eventloop_t::~eventloop_t()
+{
+    if (_looping) {
+        quit_loop();
+    }
+    this_thread_eventloop = nullptr;
 }
 
 

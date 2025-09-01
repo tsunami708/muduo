@@ -2,11 +2,10 @@
 #include <atomic>
 #include <memory>
 #include <vector>
-#include "epoller.h"
 #include "nocopy.h"
 
 
-
+class epoller_t;
 class channel_t;
 
 class eventloop_t : nocopy_t {
@@ -16,10 +15,12 @@ private:
     std::atomic_bool _looping = false;
     std::atomic_bool _quit = true;
 
+
     std::unique_ptr<epoller_t> _epoller;
     std::vector<channel_t*> _active_channels; // output parameter for epoller
 public:
     eventloop_t();
+    ~eventloop_t();
     void check_thread(); // some function can be only run by IO thread
     void start_loop();
     void update_channel(channel_t* channel);
