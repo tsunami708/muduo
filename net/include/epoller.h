@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <vector>
 #include "nocopy.h"
-
+#include "fd.h"
 
 
 class eventloop_t;
@@ -12,7 +12,7 @@ struct epoll_event;
 class epoller_t : nocopy_t {
 private:
     eventloop_t* const _onwer_eventloop;
-    const int _epoll_fd;
+    const fd_t _epoll_fd;
 
     std::unordered_map<int, channel_t*> _channels;  // key is fd
     std::vector<struct epoll_event> _active_events; // output parameter for epoll_wait

@@ -5,7 +5,7 @@
 #include "epoller.h"
 #include "channel.h"
 #include "log.h"
-
+epoller_t::~epoller_t() {}
 epoller_t::epoller_t(eventloop_t* onwer_loop)
     : _onwer_eventloop(onwer_loop), _epoll_fd(epoll_create1(EPOLL_CLOEXEC))
 {
@@ -14,11 +14,6 @@ epoller_t::epoller_t(eventloop_t* onwer_loop)
     }
     _active_events.resize(10);
 }
-
-
-
-
-epoller_t::~epoller_t() { close(_epoll_fd); }
 
 
 
