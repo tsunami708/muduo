@@ -15,3 +15,21 @@ netaddr_t::netaddr_t(uint16_t port, const char* ipv4)
         }
     }
 }
+
+const std::string& netaddr_t::get_ip() const
+{
+    if (not _ip_cache.has_value()) [[unlikely]] {
+        char ip[32] = {0};
+        inet_ntop(AF_INET, &_addr.sin_addr.s_addr, ip, 32);
+        _ip_cache = ip;
+    }
+    return _ip_cache.value();
+}
+
+uint16_t netaddr_t::get_port() const
+{
+    if (not _port_cache.has_value()) [[unlikely]] {
+        _port_cache = htons(_addr.sin_port);
+    }
+    return _port_cache.value();
+}
