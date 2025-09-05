@@ -32,5 +32,4 @@ IndentWrappedFunctionNames: false
 AlwaysBreakAfterReturnType: None
 AlwaysBreakAfterDefinitionReturnType: None
 BinPackParameters: false
-
 SortIncludes: false
