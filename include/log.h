@@ -15,6 +15,7 @@ inline std::string STR(auto x)
         return std::to_string(x);
     }
 }
+inline std::string STR(const char* s) { return s; }
 
 class log_t : nocopy_t {
 public:
