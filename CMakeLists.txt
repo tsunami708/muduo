@@ -38,6 +38,8 @@ message(STATUS "当前日志级别:${LOG_LEVEL}")
 add_library(net STATIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/log.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/eventloop.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/channel.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/epoller.cc
 )
 
 target_include_directories(net PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

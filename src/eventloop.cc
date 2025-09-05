@@ -1,10 +1,12 @@
 #include <cassert>
 #include "eventloop.h"
+#include "epoller.h"
+#include "channel.h"
 #include "log.h"
 
 thread_local eventloop_t* this_thread_eventloop = nullptr;
 
-eventloop_t::eventloop_t() : _io_thread_id(this_thread_id)
+eventloop_t::eventloop_t() : _io_thread_id(this_thread_id), _epoller(new epoller_t(this))
 {
     LOG_TRACE("Create an eventloop: "s + STR(this) + " ; onwer tid: "s + STR(_io_thread_id));
     if (this_thread_eventloop != nullptr)
@@ -25,9 +27,22 @@ void eventloop_t::start_loop()
     assert(not _looping);
     assert_in_io_thread();
     _looping = true;
+    _quitted = false;
     LOG_TRACE("Start loop");
+    while (not _quitted) {
+        _epoller->wait(&_active_channels);
+        for (channel_t* ch : _active_channels)
+            ch->handle_event();
+    }
     _looping = false;
     LOG_TRACE("End loop");
+}
+
+void eventloop_t::update_channel(channel_t* channel)
+{
+    assert(channel->get_onwer_loop() == this);
+    assert_in_io_thread();
+    _epoller->update_channel(channel);
 }
 
 void eventloop_t::assert_in_io_thread()

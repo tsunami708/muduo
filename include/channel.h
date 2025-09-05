@@ -34,6 +34,7 @@ public:
     inline void set_error_cb(const event_callback_t& cb) { _error_cb = cb; }
     inline int get_fd() const { return _fd; }
     inline int get_events() const { return _events; }
+    inline eventloop_t* get_onwer_loop() { return _onwer_loop; }
     inline void set_revents(int revent) { _revents = revent; }
     inline void enable_read()
     {

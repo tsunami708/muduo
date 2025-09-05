@@ -5,6 +5,8 @@
 const int channel_t::E_READ = EPOLLIN | EPOLLPRI | EPOLLHUP;
 const int channel_t::E_WRITE = EPOLLOUT;
 
+channel_t::~channel_t() {}
+
 void channel_t::update() { _onwer_loop->update_channel(this); }
 
 /*
