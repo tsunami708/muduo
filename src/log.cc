@@ -5,8 +5,16 @@ static std::ofstream file_to_log("record.log");
 #include <cstring>
 #include <format>
 #include <iostream>
+#include <sstream>
 #include <unistd.h>
 #include "log.h"
+
+std::string PTR(unsigned long long x)
+{
+    std::ostringstream ss;
+    ss << "0x" << std::hex << x;
+    return ss.str();
+}
 
 constexpr const char* STR_LEVEL(log_level_t level)
 {

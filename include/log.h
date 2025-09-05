@@ -2,7 +2,19 @@
 #include <string>
 #include "nocopy.h"
 
+using namespace std::string_literals;
 enum log_level_t { TRACE, DEBUG, WARN, INFO, ERROR, FATAL };
+
+
+std::string PTR(unsigned long long x);
+inline std::string STR(auto x)
+{
+    if constexpr (std::is_pointer_v<decltype(x)>) {
+        return PTR((unsigned long long)x);
+    } else {
+        return std::to_string(x);
+    }
+}
 
 class log_t : nocopy_t {
 public:

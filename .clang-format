@@ -1,5 +1,6 @@
 BasedOnStyle: GNU
 Language: Cpp
+Standard: c++20
 IndentWidth: 4
 ColumnLimit: 100
 PointerAlignment: Left
