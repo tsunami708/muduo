@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstring>
 #include <sys/eventfd.h>
 #include "eventloop.h"
 #include "timerqueue.h"
@@ -24,7 +25,7 @@ eventloop_t::eventloop_t()
         uint64_t r;
         ssize_t n = read(_wakefd, &r, 8);
         if (n != 8) [[unlikely]]
-            LOG_ERROR("read wakefd fail");
+            LOG_ERROR("read wakefd fail "s + strerror(errno));
     });
     _waker->enable_read();
 }
@@ -98,10 +99,10 @@ void eventloop_t::add_inloop(const user_fun_t& task)
 
 void eventloop_t::wake()
 {
-    uint64_t w;
+    uint64_t w = 1;
     ssize_t n = write(_wakefd, &w, 8);
     if (n != 8) [[unlikely]]
-        LOG_ERROR("wake fail"s);
+        LOG_ERROR("wake fail "s + strerror(errno));
 }
 
 void eventloop_t::do_task()
