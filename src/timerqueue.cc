@@ -1,69 +1,74 @@
-#include <cstring>
 #include <sys/timerfd.h>
+#include <unistd.h>
+#include <cstring>
 #include "timerqueue.h"
+#include "eventloop.h"
 #include "log.h"
 
-std::vector<std::unique_ptr<timer>> timerqueue_t::get_expired_timers()
+
+timer_queue_t::~timer_queue_t() {}
+timer_queue_t::timer_queue_t(eventloop_t* loop)
+    : _tfd(timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC)), _onwer_loop(loop),
+      _channel(loop, _tfd)
 {
-    auto bound = _timer_set.upper_bound({timestamp::now(), nullptr});
-    std::vector<std::unique_ptr<timer>> ret;
-
-    for (auto iter = _timer_set.begin(); iter != bound; ++iter) {
-        ret.emplace_back(std::move(const_cast<std::unique_ptr<timer>&>(iter->second)));
-    }
-
-    _timer_set.erase(_timer_set.begin(), bound);
-
-    if (_timer_set.size() == 1)
-        return ret;
-
-    struct itimerspec ts;
-    uint64_t timediff;
-    bzero(&ts, sizeof ts);
-    timediff = _timer_set.begin()->second->how_long_to_expire();
-    ts.it_value.tv_sec = timediff / 1000000;
-    ts.it_value.tv_nsec = timediff % 1000000 * 1000;
-    int r = timerfd_settime(_timerfd, 0, &ts, nullptr);
-
-    if (r == -1) [[unlikely]] {
-        LOG_ERROR(STR(__func__) + strerror(errno));
-    }
-
-    return ret;
+    if (_tfd == -1)
+        LOG_FATAL(STR(__func__) + strerror(errno));
+    _channel.set_read_cb([this] { handle_expired(); });
+    _channel.enable_read();
 }
 
-void timerqueue_t::add_timer(std::unique_ptr<timer> timer)
+
+void timer_queue_t::add_timer(duration_t delay, const timer_cb_t& func, duration_t interval)
 {
-    if (_timer_set.begin()->first >= timer->get_expiration()) {
-        struct itimerspec ts;
-        uint64_t timediff;
-        bzero(&ts, sizeof ts);
-
-        timediff = timer->how_long_to_expire();
-        ts.it_value.tv_sec = timediff / 1000000;
-        ts.it_value.tv_nsec = timediff % 1000000 * 1000;
-
-        int r = timerfd_settime(_timerfd, 0, &ts, nullptr);
-        if (r == -1) [[unlikely]] {
-            LOG_ERROR(STR(__func__) + strerror(errno));
-        }
-    }
-
-    _timer_set.emplace(timer->get_expiration(), std::move(timer));
+    _onwer_loop->assert_in_io_thread();
+    timer_t t{clock_t::now() + delay, interval, std::move(func)};
+    _timers.push(std::move(t));
+    update_timerfd();
 }
 
-void timerqueue_t::handle_expired_timer()
+void timer_queue_t::handle_expired()
 {
-    uint64_t flag;
-    read(_timerfd, &flag, sizeof flag); // 清除标志,表示处理一次定时器事件
+    _onwer_loop->assert_in_io_thread();
+    uint64_t expirations;
+    if (read(_tfd, &expirations, sizeof(expirations)) != sizeof(expirations))
+        return; // 没有真正超时
 
-    std::vector<std::unique_ptr<timer>> expired_timers = get_expired_timers();
+    auto now = clock_t::now();
+    while (not _timers.empty() and _timers.top().expire <= now) {
+        timer_t t = std::move(_timers.top());
+        _timers.pop();
 
-    for (std::unique_ptr<timer>& timer : expired_timers) {
-        timer->run();
-        if (timer->need_repeat()) {
-            timer->delay();
-            add_timer(std::move(timer));
+        t.run_task();
+
+        if (t.interval > duration_t::zero()) {
+            t.expire = now + t.interval;
+            _timers.push(std::move(t));
         }
     }
+    update_timerfd();
+}
+
+
+void timer_queue_t::update_timerfd()
+{
+    if (_timers.empty()) {
+        struct itimerspec new_value {};
+        timerfd_settime(_tfd, 0, &new_value, nullptr); // disarm
+        return;
+    }
+
+    auto now = clock_t::now();
+    auto next = _timers.top().expire;
+    auto diff = std::chrono::duration_cast<std::chrono::nanoseconds>(next - now);
+
+    if (diff.count() < 0)
+        diff = std::chrono::nanoseconds(1000);
+
+    struct itimerspec new_value {};
+    new_value.it_value.tv_sec = std::chrono::duration_cast<std::chrono::seconds>(diff).count();
+    new_value.it_value.tv_nsec = (diff % std::chrono::seconds(1)).count();
+
+    int r = timerfd_settime(_tfd, 0, &new_value, nullptr);
+    if (r < 0)
+        LOG_ERROR("timerfd_settime"s + strerror(errno));
 }

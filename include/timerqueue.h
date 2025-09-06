@@ -1,42 +1,38 @@
 #pragma once
-#include <set>
-#include <memory>
-#include <vector>
-
-#include "nocopy.h"
-#include "channel.h"
-#include "timer.h"
+#include <queue>
+#include <chrono>
+#include <functional>
 #include "fd.h"
-
+#include "channel.h"
 
 class eventloop_t;
 
-class timerqueue_t : nocopy_t {
+class timer_queue_t {
 public:
-    timerqueue_t(int fd, eventloop_t* loop) : _timerfd(fd), _onwer_loop(loop), _channel(loop, fd)
-    {
-        _timer_set.emplace(UINT64_MAX, nullptr);
-        _channel.set_read_cb([this] { handle_expired_timer(); });
-        _channel.enable_read();
-    }
+    using clock_t = std::chrono::steady_clock;
+    using time_point_t = clock_t::time_point;
+    using duration_t = clock_t::duration;
+    using timer_cb_t = std::function<void()>;
 
-    /*加入定时器到队列中*/
-    inline void add_timer(const timer::timer_callback_t& cb, uint64_t delay, uint64_t interval)
-    {
-        add_timer(std::make_unique<timer>(timestamp::future(delay), cb, interval));
-    }
-    void add_timer(std::unique_ptr<timer> timer);
+    struct timer_t {
+        time_point_t expire;
+        duration_t interval; // > 0 表示周期定时器
+        timer_cb_t run_task;
 
-    /*
-        从_timer_set中取出已经调用的定时器后交给handle_expired_timer,逐个调用到期定时器的run方法
-    */
-    std::vector<std::unique_ptr<timer>> get_expired_timers();
-    void handle_expired_timer();
+        bool operator>(const timer_t& other) const { return expire > other.expire; }
+    };
+    timer_queue_t(eventloop_t* loop);
+    ~timer_queue_t();
+    void
+    add_timer(duration_t delay, const timer_cb_t& func, duration_t interval = duration_t::zero());
+
+    void handle_expired();
 
 private:
-    std::set<std::pair<uint64_t, std::unique_ptr<timer>>> _timer_set; // 按到期时间升序
-
-    const fd_t _timerfd;
+    const fd_t _tfd;
     eventloop_t* _onwer_loop;
-    channel_t _channel; // 内嵌Channel结构(非指针),将TimeQueue视作一个特殊的Channel
+    channel_t _channel;
+    std::priority_queue<timer_t, std::vector<timer_t>, std::greater<>> _timers;
+
+    void update_timerfd();
 };
