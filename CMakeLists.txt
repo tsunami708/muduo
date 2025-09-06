@@ -41,6 +41,8 @@ add_library(net STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/channel.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/epoller.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timerqueue.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/socket.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/acceptor.cc
 )
 
 target_include_directories(net PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
