@@ -20,10 +20,11 @@ timer_queue_t::timer_queue_t(eventloop_t* loop)
 
 void timer_queue_t::add_timer(duration_t delay, const timer_cb_t& func, duration_t interval)
 {
-    _onwer_loop->assert_in_io_thread();
     timer_t t{clock_t::now() + delay, interval, std::move(func)};
-    _timers.push(std::move(t));
-    update_timerfd();
+    _onwer_loop->run_inloop([this, t] {
+        _timers.push(std::move(t));
+        update_timerfd();
+    });
 }
 
 void timer_queue_t::handle_expired()

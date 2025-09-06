@@ -31,7 +31,7 @@ void epoller_t::wait(std::vector<channel_t*>* active_channels)
     } else if (num == 0) {
         LOG_INFO("wait timeout");
     } else {
-        LOG_ERROR(STR(__func__) + strerror(errno));
+        LOG_FATAL(STR(__func__) + strerror(errno));
     }
 }
 
