@@ -61,6 +61,13 @@ void eventloop_t::update_channel(channel_t* channel)
     _epoller->update_channel(channel);
 }
 
+void eventloop_t::remove_channel(channel_t* channel)
+{
+    assert(channel->get_onwer_loop() == this);
+    assert_in_io_thread();
+    _epoller->remove_channel(channel);
+}
+
 void eventloop_t::assert_in_io_thread()
 {
     if (not is_in_io_thread())

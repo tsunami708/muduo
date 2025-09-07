@@ -39,4 +39,7 @@ public:
 private:
     // for acceptor . Not thread safe, but in loop
     void handle_connect(socket_t* connfd, const netaddr_t& paddr);
+
+    // for connection
+    void handle_close(const std::shared_ptr<tcpconn_t>& conn);
 };

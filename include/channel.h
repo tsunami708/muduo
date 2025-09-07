@@ -26,6 +26,8 @@ private:
     int _revents;
     eventloop_t* _onwer_loop;
 
+    bool _handling = false;
+
 public:
     channel_t(eventloop_t* onwer_loop, int fd) : _fd(fd), _onwer_loop(onwer_loop) {}
     ~channel_t();

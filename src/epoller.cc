@@ -63,3 +63,15 @@ void epoller_t::update_channel(channel_t* channel)
         _active_events.resize(_active_events.size() * 2);
     }
 }
+
+void epoller_t::remove_channel(channel_t* channel)
+{
+    LOG_TRACE("epoller::remove_channel");
+    int fd = channel->get_fd();
+    if (_channels.count(fd)) {
+        _channels.erase(fd);
+        int r = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, nullptr);
+        if (r < 0) [[unlikely]]
+            LOG_ERROR(STR(__func__) + strerror(errno));
+    }
+}

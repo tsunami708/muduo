@@ -25,4 +25,5 @@ public:
     ~epoller_t();
     void wait(std::vector<channel_t*>* active_channels);
     void update_channel(channel_t* channel);
+    void remove_channel(channel_t* channel);
 };

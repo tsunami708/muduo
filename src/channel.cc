@@ -1,11 +1,12 @@
 #include <sys/epoll.h>
+#include <cassert>
 #include "channel.h"
 #include "eventloop.h"
 
 const int channel_t::E_READ = EPOLLIN | EPOLLPRI | EPOLLHUP;
 const int channel_t::E_WRITE = EPOLLOUT;
 
-channel_t::~channel_t() {}
+channel_t::~channel_t() { assert(not _handling); }
 
 void channel_t::update() { _onwer_loop->update_channel(this); }
 
@@ -14,10 +15,12 @@ Channel::handle_event()是Channel的核心，它由EventLoop::start_loop()调用
 */
 void channel_t::handle_event()
 {
+    _handling = true;
     if (_revents & EPOLLERR and _error_cb)
         _error_cb();
     if (_revents & E_WRITE and _write_cb)
         _write_cb();
     if (_revents & E_READ and _read_cb)
         _read_cb();
+    _handling = false;
 }
