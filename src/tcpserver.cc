@@ -5,7 +5,7 @@
 #include "log.h"
 tcpserver_t::~tcpserver_t() {}
 tcpserver_t::tcpserver_t(eventloop_t* loop, const netaddr_t& addr)
-    : _loop(loop), _local(addr), _acceptor(new acceptor_t(loop, addr))
+    : _loop(loop), _acceptor(new acceptor_t(loop, addr))
 {
     LOG_TRACE("construct a tcpserver: "s + STR(this) + " looper is: " + STR(_loop));
     _acceptor->set_newconn_cb(
@@ -24,8 +24,6 @@ void tcpserver_t::handle_connect(socket_t* connfd, const netaddr_t& paddr)
 {
     _loop->assert_in_io_thread();
     // connfd一定是非空指针
-    std::string conn_name = paddr.convert_to_string();
-    _connections[conn_name]
-        = std::make_shared<tcpconn_t>(_loop, connfd, conn_name, _local, paddr, _conn_cb, _msg_cb);
-    _connections[conn_name]->establish();
+    _connections[*connfd] = std::make_shared<tcpconn_t>(_loop, connfd, paddr, _conn_cb, _msg_cb);
+    _connections[*connfd]->establish();
 }

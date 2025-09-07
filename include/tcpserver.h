@@ -10,20 +10,19 @@ class acceptor_t;
 class tcpconn_t;
 
 class tcpserver_t : nocopy_t {
-    using new_connection_cb_t = std::function<void(std::shared_ptr<tcpconn_t>&)>;
-    using new_message_cb_t = std::function<void(std::shared_ptr<tcpconn_t>&, const char*, ssize_t)>;
+    using new_connection_cb_t = std::function<void(const std::shared_ptr<tcpconn_t>&)>;
+    using new_message_cb_t
+        = std::function<void(const std::shared_ptr<tcpconn_t>&, const char*, ssize_t)>;
 
 private:
     bool _started = false;
     eventloop_t* _loop;
-    const netaddr_t& _local;
-    int _nid; // for connections' key
     std::unique_ptr<acceptor_t> _acceptor;
-    std::unordered_map<std::string, std::shared_ptr<tcpconn_t>> _connections;
+    std::unordered_map<int, std::shared_ptr<tcpconn_t>> _connections;
 
     // pass to tcpconn
-    new_connection_cb_t _conn_cb;
-    new_message_cb_t _msg_cb;
+    new_connection_cb_t _conn_cb; // 连接状态发生变化时回调
+    new_message_cb_t _msg_cb;     // 对端消息到达时回调
 
 public:
     tcpserver_t(eventloop_t* loop, const netaddr_t& addr);
