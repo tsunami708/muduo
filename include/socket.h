@@ -20,6 +20,13 @@ public:
     inline const struct sockaddr_in& get_socketaddr() const { return _addr; }
     const std::string& get_ip() const;
     uint16_t get_port() const;
+    std::string convert_to_string() const
+    {
+        std::string res = get_ip();
+        res += ":";
+        res += std::to_string(get_port());
+        return res;
+    }
 };
 
 

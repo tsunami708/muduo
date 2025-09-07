@@ -11,9 +11,11 @@ acceptor_t::acceptor_t(eventloop_t* loop, const netaddr_t& addr)
 
 void acceptor_t::start_listen()
 {
-    _onwer_loop->assert_in_io_thread();
-    _socketfd.listen_socket();
-    _listening = true;
+    if (not _listening) {
+        _onwer_loop->assert_in_io_thread();
+        _socketfd.listen_socket();
+        _listening = true;
+    }
 }
 
 void acceptor_t::handle_connect()
