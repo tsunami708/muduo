@@ -8,11 +8,11 @@
 class eventloop_t;
 class acceptor_t;
 class tcpconn_t;
+class buffer_t;
 
 class tcpserver_t : nocopy_t {
     using new_connection_cb_t = std::function<void(const std::shared_ptr<tcpconn_t>&)>;
-    using new_message_cb_t
-        = std::function<void(const std::shared_ptr<tcpconn_t>&, const char*, ssize_t)>;
+    using new_message_cb_t = std::function<void(const std::shared_ptr<tcpconn_t>&, buffer_t*)>;
 
 private:
     bool _started = false;

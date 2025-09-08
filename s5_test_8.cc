@@ -1,6 +1,7 @@
 #include "tcpserver.h"
 #include "eventloop.h"
 #include "tcpconn.h"
+#include "buffer.h"
 #include <stdio.h>
 
 void onConnection(const std::shared_ptr<tcpconn_t>& conn)
@@ -13,10 +14,11 @@ void onConnection(const std::shared_ptr<tcpconn_t>& conn)
     }
 }
 
-void onMessage(const std::shared_ptr<tcpconn_t>& conn, const char* data, ssize_t len)
+void onMessage(const std::shared_ptr<tcpconn_t>& conn, buffer_t* buf)
 {
-    printf("%p\n", conn.get());
-    printf("onMessage(): received %zd bytes from connection [%s]\n", len, conn->get_peer().c_str());
+    printf("onMessage(): received %zd bytes from connection [%s]\n", buf->get_read_size(),
+           conn->get_peer().c_str());
+    printf("%s\n", buf->read_all().c_str());
 }
 
 int main()

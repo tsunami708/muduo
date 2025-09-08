@@ -45,6 +45,7 @@ add_library(net STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/acceptor.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/tcpserver.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/tcpconn.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/buffer.cc
 )
 
 target_include_directories(net PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

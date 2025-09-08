@@ -42,11 +42,9 @@ void tcpconn_t::destroy()
 
 void tcpconn_t::handle_read()
 {
-    // TEST
-    char buf[2048]{};
-    ssize_t n = read(*_socket, buf, sizeof buf);
+    ssize_t n = _input_buf.read_fd(*_socket);
     if (n > 0)
-        _msg_cb(shared_from_this(), buf, n);
+        _msg_cb(shared_from_this(), &_input_buf);
     else if (n == 0)
         handle_close();
     else

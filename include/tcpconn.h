@@ -2,6 +2,7 @@
 #include <memory>
 #include <functional>
 #include <atomic>
+#include "buffer.h"
 #include "nocopy.h"
 #include "socket.h"
 #include "channel.h"
@@ -12,8 +13,7 @@ class eventloop_t;
 class tcpconn_t : nocopy_t, public std::enable_shared_from_this<tcpconn_t> {
     using new_connection_cb_t = std::function<void(const std::shared_ptr<tcpconn_t>&)>;
     using close_connection_cb_t = std::function<void(const std::shared_ptr<tcpconn_t>&)>;
-    using new_message_cb_t
-        = std::function<void(const std::shared_ptr<tcpconn_t>&, const char*, ssize_t)>;
+    using new_message_cb_t = std::function<void(const std::shared_ptr<tcpconn_t>&, buffer_t*)>;
     enum state_t { CONNECTING, CONNECTED, DISCONNECTED };
 
 private:
@@ -29,6 +29,9 @@ private:
     std::unique_ptr<socket_t> _socket;
     channel_t _channel;
     const netaddr_t _peer;
+
+    buffer_t _input_buf;
+    buffer_t _output_buf;
 
 public:
     ~tcpconn_t();
