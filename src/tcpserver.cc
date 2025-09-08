@@ -26,7 +26,7 @@ void tcpserver_t::handle_connect(socket_t* connfd, const netaddr_t& paddr)
     // connfd一定是非空指针
     _connections[*connfd] = std::make_shared<tcpconn_t>(
         _loop, connfd, paddr, _conn_cb, _msg_cb,
-        [this](const std::shared_ptr<tcpconn_t> conn) { handle_close(conn); });
+        [this](const std::shared_ptr<tcpconn_t> conn) { handle_close(conn); }, _wo_cb);
     _connections[*connfd]->establish();
 }
 

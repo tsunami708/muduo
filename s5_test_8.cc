@@ -6,7 +6,6 @@
 
 void onConnection(const std::shared_ptr<tcpconn_t>& conn)
 {
-    printf("%p\n", conn.get());
     if (conn->is_connected()) {
         printf("onConnection(): new connection %s\n", conn->get_peer().c_str());
     } else {
@@ -18,18 +17,22 @@ void onMessage(const std::shared_ptr<tcpconn_t>& conn, buffer_t* buf)
 {
     printf("onMessage(): received %zd bytes from connection [%s]\n", buf->get_read_size(),
            conn->get_peer().c_str());
-    printf("%s\n", buf->read_all().c_str());
+    std::string data = buf->read_all();
+    printf("%s\n", data.c_str());
+    conn->send(std::move(data));
 }
+
+void onWriteOver(const std::shared_ptr<tcpconn_t>& conn) {}
 
 int main()
 {
-    printf("main(): pid = %d\n", getpid());
-
     eventloop_t loop;
-
     tcpserver_t server(&loop, {8080});
+
     server.set_conn_cb(onConnection);
     server.set_msg_cb(onMessage);
+    server.set_wo_cb(onWriteOver);
+
     server.start();
 
     loop.start_loop();

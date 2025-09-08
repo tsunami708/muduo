@@ -13,8 +13,9 @@ class eventloop_t;
 class tcpconn_t : nocopy_t, public std::enable_shared_from_this<tcpconn_t> {
     using new_connection_cb_t = std::function<void(const std::shared_ptr<tcpconn_t>&)>;
     using close_connection_cb_t = std::function<void(const std::shared_ptr<tcpconn_t>&)>;
+    using write_over_cb_t = std::function<void(const std::shared_ptr<tcpconn_t>&)>;
     using new_message_cb_t = std::function<void(const std::shared_ptr<tcpconn_t>&, buffer_t*)>;
-    enum state_t { CONNECTING, CONNECTED, DISCONNECTED };
+    enum state_t { CONNECTING, CONNECTED, DISCONNECTED, DISCONNECTING };
 
 private:
     eventloop_t* _looper;
@@ -23,6 +24,7 @@ private:
     // pass by tcpserver
     const new_connection_cb_t& _conn_cb;
     const new_message_cb_t& _msg_cb;
+    const write_over_cb_t& _wo_cb;
     const close_connection_cb_t _close_cb; // no reference
     //
 
@@ -40,7 +42,8 @@ public:
               const netaddr_t& peer,
               const new_connection_cb_t& conn_cb,
               const new_message_cb_t& msg_cb,
-              const close_connection_cb_t& close_cb);
+              const close_connection_cb_t& close_cb,
+              const write_over_cb_t& wo_cb);
 
     /// notify user
     void establish();
@@ -54,8 +57,14 @@ public:
     }
     inline int get_fd() { return *_socket; }
 
+    void send(std::string&& message);
+    void shutdown(); // 告知对端不会再发送数据,用于优雅关闭连接
+
 private:
     inline void set_state(state_t s) { _state = s; }
+
+    void send_inloop(std::string&& message); // called by send
+    void shutdown_inloop();                  // called by shutdown
 
     // bind to channel
     void handle_read();

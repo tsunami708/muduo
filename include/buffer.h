@@ -37,19 +37,21 @@ public:
         _read_ptr += len;
         return res;
     }
+    inline char* peek() { return _buffer.data() + _read_ptr; }
+    inline void retrieve(size_t len) { _read_ptr += len; }
     inline size_t get_read_size() { return _write_ptr - _read_ptr; }
     inline size_t get_write_size() { return _buffer.size() - _write_ptr + 1; }
     inline size_t get_free_size() { return _read_ptr - RESERVE_ZONE_END; }
     ssize_t read_fd(int fd);
-
-private:
-    void move_read_data();
-
-    inline void make_space(int delta) { _buffer.resize(_buffer.size() + delta); }
-    inline void append(char buf[], int size)
+    inline void append(char buf[], size_t size)
     {
         for (int i = 0; i < size; ++i) {
             _buffer[_write_ptr++] = buf[i];
         }
     }
+
+private:
+    void move_read_data();
+
+    inline void make_space(int delta) { _buffer.resize(_buffer.size() + delta); }
 };

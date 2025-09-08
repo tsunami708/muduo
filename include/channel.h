@@ -58,6 +58,7 @@ public:
         _events = 0;
         update();
     }
+    inline bool is_writing() { return _events & E_WRITE; }
     void handle_event();
 
 private:
