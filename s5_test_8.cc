@@ -22,7 +22,7 @@ void onMessage(const std::shared_ptr<tcpconn_t>& conn, buffer_t* buf)
     conn->send(std::move(data));
 }
 
-void onWriteOver(const std::shared_ptr<tcpconn_t>& conn) {}
+void onWriteOver(const std::shared_ptr<tcpconn_t>& conn) { printf("data write over\n"); }
 
 int main()
 {

@@ -1,5 +1,6 @@
 #include "acceptor.h"
 #include "eventloop.h"
+#include "log.h"
 acceptor_t::~acceptor_t() {}
 acceptor_t::acceptor_t(eventloop_t* loop, const netaddr_t& addr)
     : _onwer_loop(loop), _socketfd(socket_t::create_socket()), _channel(loop, _socketfd)
@@ -20,6 +21,7 @@ void acceptor_t::start_listen()
 
 void acceptor_t::handle_connect()
 {
+    LOG_DEBUG("accept a request");
     _onwer_loop->assert_in_io_thread();
     netaddr_t peer_addr;
     socket_t* new_conn = _socketfd.accept_request(&peer_addr);

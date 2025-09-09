@@ -38,7 +38,7 @@ void tcpconn_t::establish()
 
 void tcpconn_t::destroy()
 {
-    assert(_state == CONNECTED);
+    assert(_state == CONNECTED || _state == DISCONNECTING);
     _looper->assert_in_io_thread();
     LOG_TRACE("tcpconn_t::destroy");
     set_state(DISCONNECTED);
@@ -60,7 +60,7 @@ void tcpconn_t::handle_read()
 
 void tcpconn_t::handle_close()
 {
-    assert(_state == CONNECTED);
+    assert(_state == CONNECTED || _state == DISCONNECTING);
     _looper->assert_in_io_thread();
     LOG_TRACE("tcpconn_t::handle_close-"s + get_peer());
     _channel.disable_all();
@@ -109,6 +109,9 @@ void tcpconn_t::send_inloop(std::string&& message)
                 LOG_INFO(get_peer() + " is goint to send more data"s);
                 _output_buf.append(message.data() + n, message.length() - n);
                 _channel.enable_write();
+            } else {
+                if (_wo_cb)
+                    _wo_cb(shared_from_this());
             }
         } else {
             if (errno != EWOULDBLOCK)
