@@ -7,6 +7,7 @@ static std::ofstream file_to_log("record.log");
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
+#include <signal.h>
 #include "log.h"
 
 std::string PTR(unsigned long long x)
@@ -42,6 +43,33 @@ inline const char* FILE_NAME(const char* file_path) { return strrchr(file_path, 
 thread_local log_t this_thread_log;
 thread_local int this_thread_id = gettid();
 
+class signal_handler_t {
+    inline static bool _handling = false;
+
+public:
+    signal_handler_t() { register_signal_handlers(); }
+
+private:
+    void register_signal_handlers()
+    {
+        signal(SIGINT, handle_signal);
+        signal(SIGTERM, handle_signal);
+        signal(SIGABRT, handle_signal);
+        signal(SIGSEGV, handle_signal);
+        signal(SIGPIPE, SIG_IGN);
+    }
+
+    static void handle_signal(int signum)
+    {
+        if (not _handling) {
+            _handling = true;
+            std::clog.flush();
+            signal(signum, SIG_DFL);
+            raise(signum);
+        }
+    }
+};
+static signal_handler_t sh;
 
 log_t::log_t()
 {

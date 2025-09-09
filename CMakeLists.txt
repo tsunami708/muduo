@@ -5,7 +5,7 @@ project(muduo)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_BUILD_TYPE DEBUG) #发布版本改为RELEASE
+set(CMAKE_BUILD_TYPE DEBUG) 
 
 
 set(LOG_FILE OFF CACHE STRING "日志输出到record.log文件")
@@ -34,18 +34,8 @@ elseif(LOG_LEVEL STREQUAL "F")
 endif()
 message(STATUS "当前日志级别:${LOG_LEVEL}")
 
+add_subdirectory(base)
+add_subdirectory(net)
 
-add_library(net STATIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/log.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/eventloop.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/channel.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/epoller.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/timerqueue.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/socket.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/acceptor.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tcpserver.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tcpconn.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/buffer.cc
-)
-
-target_include_directories(net PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_executable(test ${CMAKE_CURRENT_SOURCE_DIR}/test.cc)
+target_link_libraries(test PRIVATE net)

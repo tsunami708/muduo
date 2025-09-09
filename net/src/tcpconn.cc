@@ -1,14 +1,10 @@
 #include <cassert>
 #include <cstring>
-#include <signal.h>
 #include "tcpconn.h"
 #include "eventloop.h"
 #include "log.h"
 
-struct signal_t {
-    signal_t() { signal(SIGPIPE, SIG_IGN); }
-};
-signal_t global_sigpipe_ig;
+
 
 tcpconn_t::tcpconn_t(eventloop_t* loop,
                      socket_t* psock,

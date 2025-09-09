@@ -22,5 +22,6 @@ void channel_t::handle_event()
         _write_cb();
     if (_revents & E_READ and _read_cb)
         _read_cb();
+    set_revents(0); // NOTE !
     _handling = false;
 }
