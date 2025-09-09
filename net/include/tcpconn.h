@@ -56,7 +56,7 @@ public:
         return _peer.get_ip() + ":" + std::to_string(_peer.get_port());
     }
     inline int get_fd() { return *_socket; }
-
+    inline eventloop_t* get_looper() { return _looper; }
     void send(std::string&& message);
     void shutdown(); // 告知对端不会再发送数据,用于优雅关闭连接
 

@@ -22,4 +22,5 @@ public:
         _sem.acquire();
         return _looper;
     }
+    eventloop_t* get_looper() { return _looper; }
 };

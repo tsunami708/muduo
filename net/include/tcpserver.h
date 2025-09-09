@@ -5,10 +5,12 @@
 #include "socket.h"
 #include "nocopy.h"
 
+
 class eventloop_t;
 class acceptor_t;
 class tcpconn_t;
 class buffer_t;
+class el_pool_t;
 
 class tcpserver_t : nocopy_t {
     using new_connection_cb_t = std::function<void(const std::shared_ptr<tcpconn_t>&)>;
@@ -16,6 +18,8 @@ class tcpserver_t : nocopy_t {
     using write_over_cb_t = std::function<void(const std::shared_ptr<tcpconn_t>&)>;
 
 private:
+    std::unique_ptr<el_pool_t> _loop_pool;
+
     bool _started = false;
     eventloop_t* _loop;
     std::unique_ptr<acceptor_t> _acceptor;
@@ -27,7 +31,8 @@ private:
     write_over_cb_t _wo_cb;
 
 public:
-    tcpserver_t(eventloop_t* loop, const netaddr_t& addr);
+    // n是loop_pool的大小
+    tcpserver_t(const netaddr_t& addr, size_t n = 1);
     ~tcpserver_t();
 
     // It's harmless to call it multiple times.
