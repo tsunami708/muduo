@@ -45,6 +45,7 @@ void eventloop_t::start_loop()
     _quitted = false;
     LOG_TRACE("Start loop");
     while (not _quitted) {
+        _active_channels.clear();
         _epoller->wait(&_active_channels);
         for (channel_t* ch : _active_channels)
             ch->handle_event();
